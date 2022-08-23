@@ -1,11 +1,12 @@
 {
   "dependencies": {
+    "body-parser": "^1.20.0",
     "express": "^4.18.1"
   },
   "devDependencies": {
     "nodemon": "^2.0.19"
   },
-  "scripts":{
+  "scripts": {
     "start:server": "nodemon server.js"
   }
 }
