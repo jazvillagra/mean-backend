@@ -4,8 +4,9 @@ const bodyParser = require('body-parser');
 const Post = require('./models/post');
 
 const mongoose = require('mongoose');
+const post = require('./models/post');
 
-mongoose.connect('mongodb+srv://admin:huIBafEm1b1TcS5o@cluster0.nwlfr2u.mongodb.net/test?retryWrites=true&w=majority')
+mongoose.connect('mongodb+srv://admin:huIBafEm1b1TcS5o@cluster0.nwlfr2u.mongodb.net/node-angular?retryWrites=true&w=majority')
     .then(() => {
         console.log('Connected to database!');
     })
@@ -30,22 +31,19 @@ app.post('/api/posts', (req, res, next) => {
         title: req.body.title,
         content: req.body.content
     });
-    console.log('Request: ', post);
+    post.save();
     res.status(201).json({
         message: 'Post added successfully'
     });
 });
 
 app.get('/api/posts', (req, res, next) => {
-    const posts = [
-        {id: 'asdgar', title: 'This is the first title', content: 'This is coming from the server'},
-        {id: 'gerrot', title: 'This is the second title', content: 'This is coming from the server'},
-        {id: 'assudr', title: 'This is the third title', content: 'This is coming from the server'}
-    ];
-
-    res.status(200).json({
-        message: 'Posts fetched successfully',
-        posts: posts
+    Post.find().then(documents => {
+        console.log(documents);
+        res.status(200).json({
+            message: 'Posts fetched successfully',
+            posts: documents
+        });
     });
 });
 
