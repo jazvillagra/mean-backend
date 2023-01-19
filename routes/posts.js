@@ -1,25 +1,57 @@
 const express = require("express");
+const multer = require("multer");
 
 const router = express.Router();
 
-const Post = require('../models/post');
+const MIME_TYPE_MAP = {
+    'image/png': 'png',
+    'image/jpg': 'jpg',
+    'image/jpeg': 'jpg'
+}
+const path = require('path');
 
-router.post('', (req, res, next) => {
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const isValid = MIME_TYPE_MAP[file.mimetype];
+    let error = new Error("Invalid mime type");
+    if (isValid) {
+      error = null;
+    }
+    cb(error, path.join(__dirname, '../images'));
+  },
+  filename: (req, file, cb) => {
+    const name = file.originalname
+      .toLowerCase()
+      .split(" ")
+      .join("-");
+    const ext = MIME_TYPE_MAP[file.mimetype];
+    cb(null, name + "-" + Date.now() + "." + ext);
+  }
+});
+
+const Post = require("../models/post");
+
+router.post("", multer({storage: storage}).single("image"), (req, res, next) => {
+    const url = req.protocol + '://' + req.get("host");
     const post = new Post({
         title: req.body.title,
-        content: req.body.content
+        content: req.body.content,
+        imagePath: url + "/images/" + req.file.filename
     });
-    post.save().then(result => {
-        console.log(result);
+    post.save().then(createdPost => {
+        console.log(createdPost);
         res.status(201).json({
             message: 'Post added successfully',
-            postId: result._id
+            post: {
+                ...createdPost,
+                id: createdPost._id
+            }
         });
     });
 });
 
 
-router.get('', (req, res, next) => {
+router.get("", (req, res, next) => {
     Post.find().then(documents => {
         console.log(documents);
         res.status(200).json({
@@ -29,7 +61,7 @@ router.get('', (req, res, next) => {
     });
 });
 
-router.delete('/:id', (req, res, next) => {
+router.delete("/:id", (req, res, next) => {
     Post.deleteOne({_id: req.params.id}).then(result => {
         console.log(result);
         res.status(200).json({message: 'Deleted post'});

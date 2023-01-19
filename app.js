@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 
+const path = require('path');
 const postsRoutes = require("./routes/posts");
 
 const app = express();
@@ -16,6 +17,8 @@ mongoose.connect('mongodb+srv://admin:huIBafEm1b1TcS5o@cluster0.nwlfr2u.mongodb.
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
+
+app.use('/images', express.static(path.join(__dirname, '/images')));
 
 app.use((req, res, next) =>{
     res.setHeader('Access-Control-Allow-Origin','*');
